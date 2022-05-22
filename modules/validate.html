@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        const Joi = require('joi');
+
+const schema = Joi.object({
+    username: Joi.string()
+        .alphanum()
+        .min(3)
+        .max(30)
+        .required(),
+
+    password: Joi.string()
+        .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
+})
+    </script>
+</html>
+<body>
+
+<form action="/validate-form" method="POST">
+          <label>First Name</label>
+          <input type="text" placeholder="Enter First Name" name="firstName" value="">
+           <p style="color: red;"></p>
+
+          <label>Email Address</label>
+          <input type="email" placeholder="Enter Email Address" name="emailAddress" value="">
+          <p style="color: red;"></p>
+
+          <label>Password</label>
+          <input type="password" placeholder="Enter Password" name="password">
+          <p style="color: red;"></p>
+          
+          
+          <button type="submit">Submit</button>
+          </form>
+
+</body>
+</html>
