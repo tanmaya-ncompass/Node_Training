@@ -1,20 +1,21 @@
 const pool = require('../utilities/connection')
 const joi = require("joi");
 const { authSchema, studentSchema } = require("../models/validation");
+const {CustomClass}= require("../middleware/customError");
+const {compressResponse}= require("../utilities/compression");
+
 
 function create(req, res) {
-  const S_ID= req.body.id
-  const S_NAME=req.body.name
-  const DEPARTMENT= req.body.dept
-  const CGPA = req.body.cgpa
-
+  // const S_ID= req.body.id
+  // const S_NAME=req.body.name
+  // const DEPARTMENT= req.body.dept
+  // const CGPA = req.body.cgpa
 //   pool.query('insert into STUDENT values(?,?,?,?);',[S_ID,S_NAME,DEPARTMENT,CGPA], (err,result) => {
 //     if(err){throw err}
 //     res.json({message:"Student added sucessfully"});
- 
 //    })
 //  };
-  
+  let {S_ID,S_NAME,DEPARTMENT,CGPA} = req.body;
   let val = studentSchema.validate(req.body)
   if(val.error){
     res.status(401).json({
@@ -23,60 +24,178 @@ function create(req, res) {
     })
     return
 }  
-con.query(`INSERT INTO STUDENT (S_ID,S_NAME,DEPARTMENT,CGPA) values (?,?,?,?)`,[S_ID,S_NAME,DEPARTMENT,CGPA],
-(err,result)=> {
+pool.query('insert into STUDENT values(?,?,?,?);',[S_ID,S_NAME,DEPARTMENT,CGPA], async (err,result) =>  {
     if(err || result.length === 0){
         res.status(400).json({
             success : err ? false : true,
-            message : err ? err.message : `inserted ${result.affectedRows} records`,
+            message : err ? err.message : 'inserted ${result.affectedRows} records',
             data : result
         })
         return
     }
-    res.status(201).json({
-        success : true,
-        "message" : `inserted ${result.affectedRows} records`,
-        data:result
+
+    res.setHeader('Content-Encoding','gzip');
+    res.setHeader('Content-Type','application/json');
+    
+    let val = await compressResponse({
+        "success" : true,
+        "message" : 'inserted ${result.affectedRows} records',
+        "data" :result
     })
+   // console.log(val);
+    res.status(201).send(val)
 })
-}
+};
 
-
-
-function read (req, res) {
+function read (req, res,next) {
   const id = req.params.id
-  pool.query('select * from STUDENT where S_ID = ?;',[id], (err,result) => {
-      
-   res.json(result);
+  pool.query('select * from STUDENT where S_ID = ?;',[id], async(err,result) => {
+
+    // throw new CustomClass("Error Found!");
+
+    // try {
+    //   test();
+    // } catch(err) {
+    //   console.error(err.message);
+    //   console.error(err.name);
+    // }
+
+    if(err || result.length === 0){
+      res.status(400).json({
+          success : false,
+          message : err ? err.message : "no record found" ,
+          data : result
+      })
+      next()
+  }
+  res.setHeader('Content-Encoding','gzip');
+  res.setHeader('Content-Type','application/json');
+  
+  let val = await compressResponse({
+      "success" : true,
+      "message" : `Fetched ${result.length} records`,
+      "data" :result
   })
+  //console.log(val);
+  res.status(200).send(val)
+
+})
 };
 
 function read_all (req, res)  {
-  pool.query('select * from STUDENT ;', (err,result) => {
-   res.json(result);
+  pool.query('select * from STUDENT ;', async(err,result) => {
+    if(err || result.length === 0){
+      res.status(400).json({
+          success : err ? false : true,
+          message : err ? err.message : "no record found",
+          data : result
+      })
+  }
+
+  res.setHeader('Content-Encoding','gzip');
+  res.setHeader('Content-Type','application/json');
+
+  let val = await compressResponse({
+      "success" : true,
+      "message" : `Fetched ${result.length} records`,
+      "data" :result
   })
+  //console.log(val);
+  res.status(200).send(val)
+
+//   res.status(200).json({
+//       success : true,
+//       "message" : `Fetched ${result.length} records`,
+//       data:result
+//   })
+ })
 };
 
 function update (req, res)  {
-  const id = req.params.id
-  const S_NAME=req.body.name
-  const DEPARTMENT= req.body.dept
-  const CGPA = req.body.cgpa
-  pool.query('update STUDENT set S_NAME = ?, DEPARTMENT = ?, CGPA = ? where S_ID = ?;',[S_NAME,DEPARTMENT,CGPA,id], (err,result) => {
-   if(err){throw err}
-   res.json({message:"Student updated sucessfully"});
+  const S_ID = req.params.id
+  // const S_NAME=req.body.name
+  // const DEPARTMENT= req.body.dept
+  // const CGPA = req.body.cgpa
 
+  let {S_NAME,DEPARTMENT,CGPA} = req.body;
+  let val = studentSchema.validate(req.body)
+  if(val.error){
+    res.status(401).json({
+        success : false,
+        message : val.error.message
+    })
+    return
+}  
+  pool.query('update STUDENT set S_NAME = ?, DEPARTMENT = ?, CGPA = ? where S_ID = ?;',[S_NAME,DEPARTMENT,CGPA,S_ID], async (err,result) => {
+    if(err || result.length === 0){
+      res.status(400).json({
+          success : err ? false : true,
+          message : err ? err.message : `inserted ${result.affectedRows} records`,
+          data : result
+      })
+  }
+  res.setHeader('Content-Encoding','gzip');
+  res.setHeader('Content-Type','application/json');
+
+  let val = await compressResponse({
+      "success" : true,
+      "message" : `Updated ${result.affectedRows} records`,
+      "data" :result
   })
+  //console.log(val);
+  res.status(200).send(val)
+})
 };
 
 
 function delete_student (req, res) {
   const id = req.params.id
-  pool.query('delete from STUDENT where S_ID = ?;',[id], (err,result) => {
-    
-    if(err){throw err}
-    res.json({message:"Student deleted sucessfully"});
+  pool.query('delete from STUDENT where S_ID = ?;',[id], async (err,result) => {
+    if(err || result.affectedRows === 0){
+      res.status(400).json({
+          success : err ? false : true,
+          message : err ? err.message : `ID NOT FOUND records`,
+          data : result
+      })
+  }
+
+  res.setHeader('Content-Encoding','gzip');
+  res.setHeader('Content-Type','application/json');
+
+  let val = await compressResponse({
+      "success" : true,
+      "message" : `deleted ${result.affectedRows} records`,
+      "data" :result
   })
+  //console.log(val);
+  res.status(200).send(val)
+})
+};
+
+
+function studentLogin (req, res) {
+  const id = req.params.email_id
+  pool.query('select * from user_verification where S_ID = ?;',[email_id], async (err,result) => {
+    if(err || result.length === 0){
+      res.status(400).json({
+          success : false,
+          message : err ? err.message : "no record found" ,
+          data : result
+      })
+      next()
+  }
+  res.setHeader('Content-Encoding','gzip');
+  res.setHeader('Content-Type','application/json');
+  
+  let val = await compressResponse({
+      "success" : true,
+      "message" : `Fetched ${result.length} records`,
+      "data" :result
+  })
+  //console.log(val);
+  res.status(200).send(val)
+
+})
 };
 
 
@@ -85,5 +204,6 @@ module.exports = {
     read,
     read_all,
     update,
-    delete_student
+    delete_student,
+    studentLogin
 }

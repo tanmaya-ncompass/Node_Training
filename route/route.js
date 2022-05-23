@@ -1,5 +1,5 @@
 //module.exports = app => {
-
+const {errorHandler} =require("../middleware/error") 
 const req = require("express/lib/request");
 
 
@@ -9,18 +9,22 @@ const {
   read, 
   create, 
   update,
-  //studentLogin,
- // test
+  studentLogin,
 } = require("../controller/controller");
 
 const { authValidation, studentValidation } = require("../models/validation");
+const { append } = require("express/lib/response");
 
     
     var router = require("express").Router();
     //const create = require('./modules/create')
+
+    router.get("/error",(req,res)=>{
+      throw new Error("Broken");
+    });
   
     // // Create a new Student
-    router.post("/", create);
+    router.post("/",create);
   
     //Retrieve all Student
     router.get("/", read_all);
@@ -36,11 +40,11 @@ const { authValidation, studentValidation } = require("../models/validation");
     // // Delete a Student with id
     router.delete("/:id",delete_student);
 
+
+    router.get('/:email_id',studentLogin)
     //student log in
     //router.get('/login',authValidation,studentLogin)
-
    
-    
-   // app.use('/api/tutorials', router);
+    // app.use('/api/tutorials', router);
  // };
  module.exports = router

@@ -12,9 +12,3 @@ const pool = createPool.createConnection({
 });
 
 module.exports=pool
-
-// pool.query('select * from STUDENT;', (err,result) => {
-  
-//         return console.log(result);
-        
-// })
