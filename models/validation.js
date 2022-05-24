@@ -19,4 +19,4 @@ module.exports={
     studentSchema
 }
 
-console.log(authSchema.validate({email:"tanmaya@gmail.com",password:"tanmaya1234"}).error)
+//console.log(authSchema.validate({email:"tanmaya@gmail.com",password:"tanmaya1234"}).error)

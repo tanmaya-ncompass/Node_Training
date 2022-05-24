@@ -41,7 +41,7 @@ const { append } = require("express/lib/response");
     router.delete("/:id",delete_student);
 
 
-    router.get('/:email_id',studentLogin)
+    
     //student log in
     //router.get('/login',authValidation,studentLogin)
    

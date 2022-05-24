@@ -11,6 +11,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/student',require('./route/route'))
+app.use('/user_verification',require('./route/verification_route'))
 
 app.listen(port, () => {
 

@@ -3,6 +3,8 @@ const joi = require("joi");
 const { authSchema, studentSchema } = require("../models/validation");
 const {CustomClass}= require("../middleware/customError");
 const {compressResponse}= require("../utilities/compression");
+const {genToken,verifyToken} = require("../utilities/JWTtoken");
+const { header } = require('express/lib/response');
 
 
 function create(req, res) {
@@ -15,6 +17,15 @@ function create(req, res) {
 //     res.json({message:"Student added sucessfully"});
 //    })
 //  };
+
+  const token = req.headers.authorization
+  const verify = verifyToken(token)
+  
+  if (verify == false){
+    res.json("Invalid Token")
+    return
+  }
+  
   let {S_ID,S_NAME,DEPARTMENT,CGPA} = req.body;
   let val = studentSchema.validate(req.body)
   if(val.error){
@@ -47,7 +58,17 @@ pool.query('insert into STUDENT values(?,?,?,?);',[S_ID,S_NAME,DEPARTMENT,CGPA],
 })
 };
 
+
 function read (req, res,next) {
+
+  const token = req.headers.authorization
+  const verify = verifyToken(token)
+  
+  if (verify == false) {
+    res.json("Invalid Token")
+    return
+  }
+  
   const id = req.params.id
   pool.query('select * from STUDENT where S_ID = ?;',[id], async(err,result) => {
 
@@ -83,6 +104,15 @@ function read (req, res,next) {
 };
 
 function read_all (req, res)  {
+
+  const token = req.headers.authorization
+  const verify = verifyToken(token)
+  
+  if (verify == false) {
+    res.json("Invalid Token")
+    return
+  }
+
   pool.query('select * from STUDENT ;', async(err,result) => {
     if(err || result.length === 0){
       res.status(400).json({
@@ -112,6 +142,15 @@ function read_all (req, res)  {
 };
 
 function update (req, res)  {
+
+  const token = req.headers.authorization
+  const verify = verifyToken(token)
+  
+  if (verify == false) {
+    res.json("Invalid Token")
+    return
+  }
+
   const S_ID = req.params.id
   // const S_NAME=req.body.name
   // const DEPARTMENT= req.body.dept
@@ -149,6 +188,15 @@ function update (req, res)  {
 
 
 function delete_student (req, res) {
+
+const token = req.headers.authorization
+  const verify = verifyToken(token)
+  
+  if (verify == false) {
+    res.json("Invalid Token")
+    return
+  }
+
   const id = req.params.id
   pool.query('delete from STUDENT where S_ID = ?;',[id], async (err,result) => {
     if(err || result.affectedRows === 0){
@@ -175,28 +223,20 @@ function delete_student (req, res) {
 
 function studentLogin (req, res) {
   const id = req.params.email_id
-  pool.query('select * from user_verification where S_ID = ?;',[email_id], async (err,result) => {
+  pool.query('select * from user_verification where email_id = ?;',[id], (err,result) => {
     if(err || result.length === 0){
-      res.status(400).json({
-          success : false,
-          message : err ? err.message : "no record found" ,
+      res.json({
+          success : err ? false : true,
+          message : err ? err.message : `email ID NOT FOUND records`,
           data : result
       })
-      next()
-  }
-  res.setHeader('Content-Encoding','gzip');
-  res.setHeader('Content-Type','application/json');
-  
-  let val = await compressResponse({
-      "success" : true,
-      "message" : `Fetched ${result.length} records`,
-      "data" :result
-  })
-  //console.log(val);
-  res.status(200).send(val)
+      return
+    }
+    const token = genToken(id)
 
-})
-};
+    res.json({token});
+     })
+     };
 
 
 module.exports = {
