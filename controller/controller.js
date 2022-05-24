@@ -8,24 +8,14 @@ const { header } = require('express/lib/response');
 
 
 function create(req, res) {
-  // const S_ID= req.body.id
-  // const S_NAME=req.body.name
-  // const DEPARTMENT= req.body.dept
-  // const CGPA = req.body.cgpa
-//   pool.query('insert into STUDENT values(?,?,?,?);',[S_ID,S_NAME,DEPARTMENT,CGPA], (err,result) => {
-//     if(err){throw err}
-//     res.json({message:"Student added sucessfully"});
-//    })
-//  };
-
-  const token = req.headers.authorization
+  
+  const token = req.headers.authorization.split(" ")[1]
   const verify = verifyToken(token)
   
   if (verify == false){
     res.json("Invalid Token")
     return
   }
-  
   let {S_ID,S_NAME,DEPARTMENT,CGPA} = req.body;
   let val = studentSchema.validate(req.body)
   if(val.error){
@@ -53,15 +43,16 @@ pool.query('insert into STUDENT values(?,?,?,?);',[S_ID,S_NAME,DEPARTMENT,CGPA],
         "message" : 'inserted ${result.affectedRows} records',
         "data" :result
     })
-   // console.log(val);
+  
     res.status(201).send(val)
 })
 };
 
 
+
 function read (req, res,next) {
 
-  const token = req.headers.authorization
+  const token = req.headers.authorization.split(" ")[1]
   const verify = verifyToken(token)
   
   if (verify == false) {
@@ -71,15 +62,6 @@ function read (req, res,next) {
   
   const id = req.params.id
   pool.query('select * from STUDENT where S_ID = ?;',[id], async(err,result) => {
-
-    // throw new CustomClass("Error Found!");
-
-    // try {
-    //   test();
-    // } catch(err) {
-    //   console.error(err.message);
-    //   console.error(err.name);
-    // }
 
     if(err || result.length === 0){
       res.status(400).json({
@@ -97,7 +79,6 @@ function read (req, res,next) {
       "message" : `Fetched ${result.length} records`,
       "data" :result
   })
-  //console.log(val);
   res.status(200).send(val)
 
 })
@@ -105,7 +86,7 @@ function read (req, res,next) {
 
 function read_all (req, res)  {
 
-  const token = req.headers.authorization
+  const token = req.headers.authorization.split(" ")[1]
   const verify = verifyToken(token)
   
   if (verify == false) {
@@ -130,20 +111,16 @@ function read_all (req, res)  {
       "message" : `Fetched ${result.length} records`,
       "data" :result
   })
-  //console.log(val);
+
   res.status(200).send(val)
 
-//   res.status(200).json({
-//       success : true,
-//       "message" : `Fetched ${result.length} records`,
-//       data:result
-//   })
+
  })
 };
 
 function update (req, res)  {
 
-  const token = req.headers.authorization
+  const token = req.headers.authorization.split(" ")[1]
   const verify = verifyToken(token)
   
   if (verify == false) {
@@ -152,10 +129,6 @@ function update (req, res)  {
   }
 
   const S_ID = req.params.id
-  // const S_NAME=req.body.name
-  // const DEPARTMENT= req.body.dept
-  // const CGPA = req.body.cgpa
-
   let {S_NAME,DEPARTMENT,CGPA} = req.body;
   let val = studentSchema.validate(req.body)
   if(val.error){
@@ -181,15 +154,13 @@ function update (req, res)  {
       "message" : `Updated ${result.affectedRows} records`,
       "data" :result
   })
-  //console.log(val);
   res.status(200).send(val)
 })
 };
 
-
 function delete_student (req, res) {
 
-const token = req.headers.authorization
+const token = req.headers.authorization.split(" ")[1]
   const verify = verifyToken(token)
   
   if (verify == false) {
@@ -215,7 +186,6 @@ const token = req.headers.authorization
       "message" : `deleted ${result.affectedRows} records`,
       "data" :result
   })
-  //console.log(val);
   res.status(200).send(val)
 })
 };

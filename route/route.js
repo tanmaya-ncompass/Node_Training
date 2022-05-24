@@ -17,12 +17,7 @@ const { append } = require("express/lib/response");
 
     
     var router = require("express").Router();
-    //const create = require('./modules/create')
-
-    router.get("/error",(req,res)=>{
-      throw new Error("Broken");
-    });
-  
+    
     // // Create a new Student
     router.post("/",create);
   
@@ -41,10 +36,4 @@ const { append } = require("express/lib/response");
     router.delete("/:id",delete_student);
 
 
-    
-    //student log in
-    //router.get('/login',authValidation,studentLogin)
-   
-    // app.use('/api/tutorials', router);
- // };
  module.exports = router

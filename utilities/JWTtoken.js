@@ -11,13 +11,16 @@ const verifyToken = (token) => {
   return jwt.verify(token, secret);
 };
 
+ module.exports={genToken,verifyToken}
 
-// console.log(genToken("hello", "nub"));
-// console.log(
-//   verifyToken(
-//     "eyJhbGciOiJIUzI1NiJ9.aGVsbG8.BNDcZJsWWu5Y36VN-RM6iC11LUQOcRg786T4qe0IHgY",
-//     "nub"
-//   )
-//);
-
-module.exports={genToken,verifyToken}
+// let token;
+//   let authHeader = req.headers["authorization"];
+//   if (authHeader.startsWith("Bearer ")) {
+//     token = authHeader.substring(7, authHeader.length);
+//   } else {
+//     token = authHeader;
+//   }
+//   let val = verifyToken(token, process.env.PRIVATE_KEY);
+//   if (!val) {
+//     return;
+//   }
